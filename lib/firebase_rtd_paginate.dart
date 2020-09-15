@@ -43,26 +43,28 @@ typedef Widget ItemWidgetBuilder<T>(BuildContext context, T item, int index);
 class FirebaseRTDPaginate<T> extends StatefulWidget {
   FirebaseRTDPaginate(
       {Key key,
-        @required this.query,
-        @required this.itemWidgetBuilder,
-        @required this.modelBuilder,
-        @required this.comparatorItem,
-        @required this.attribute,
-        this.lastVal,
-        this.gridDelegate =
-        const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-        this.itemsPerPage = 15,
-        this.onError,
-        this.emptyDisplay = const EmptyDisplay(),
-        this.separator = const EmptySeparator(),
-        this.initialLoader = const InitialLoader(),
-        this.bottomLoader = const BottomLoader(),
-        this.shrinkWrap = false,
-        this.reverse = false,
-        this.scrollDirection = Axis.vertical,
-        this.padding = const EdgeInsets.all(0),
-        this.itemBuilderType,
-        this.physics})
+      @required this.query,
+      @required this.itemWidgetBuilder,
+      @required this.modelBuilder,
+      @required this.comparatorItem,
+      @required this.attribute,
+      this.lastVal,
+      this.gridDelegate =
+          const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+      this.itemsPerPage = 15,
+      this.onError,
+      this.emptyDisplay = const EmptyDisplay(),
+      this.separator = const EmptySeparator(),
+      this.initialLoader = const InitialLoader(),
+      this.bottomLoader = const BottomLoader(),
+      this.shrinkWrap = false,
+      this.reverse = false,
+      this.scrollDirection = Axis.vertical,
+      this.padding = const EdgeInsets.all(0),
+      this.itemBuilderType,
+      this.footerColor = Colors.black54,
+      this.footerHeight = 50.0,
+      this.physics})
       : super(key: key);
 
   final ComparatorItem<T> comparatorItem;
@@ -83,6 +85,8 @@ class FirebaseRTDPaginate<T> extends StatefulWidget {
   final bool shrinkWrap;
   final String attribute;
   final int lastVal;
+  final double footerHeight;
+  final Color footerColor;
 
   @override
   _FirebaseRTDPaginateState createState() => _FirebaseRTDPaginateState<T>();
@@ -91,13 +95,12 @@ class FirebaseRTDPaginate<T> extends StatefulWidget {
 }
 
 class _FirebaseRTDPaginateState<T> extends State<FirebaseRTDPaginate<T>> {
-
   PaginationBloc _bloc;
   final _scrollController = ScrollController();
-  RefreshController _refreshController = RefreshController(initialRefresh: false);
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
 
-
-  void _onRefresh() async{
+  void _onRefresh() async {
     // monitor network fetch
     await Future.delayed(Duration(milliseconds: 1000));
     // if failed,use refreshFailed()
@@ -106,7 +109,7 @@ class _FirebaseRTDPaginateState<T> extends State<FirebaseRTDPaginate<T>> {
     _refreshController.refreshCompleted(resetFooterState: true);
   }
 
-  void _onLoading() async{
+  void _onLoading() async {
     // monitor network fetch
     await Future.delayed(Duration(milliseconds: 1000));
     // if failed,use loadFailed(),if no data return,use LoadNodata()
@@ -131,34 +134,31 @@ class _FirebaseRTDPaginateState<T> extends State<FirebaseRTDPaginate<T>> {
             return widget.emptyDisplay;
           }
           return Container(
-            padding: widget.padding,
+              padding: widget.padding,
               child: SmartRefresher(
-              enablePullDown: true,
-              enablePullUp: true,
-              header: WaterDropHeader(),
-              footer: CustomFooter(
-                loadStyle: LoadStyle.ShowWhenLoading,
-                builder: (BuildContext context,LoadStatus mode){
-                  Widget body ;
-                  if(mode==LoadStatus.loading){
-                    body =  CupertinoActivityIndicator();
-                  }
-                  return Container(
-                    height: 50.0,
-                    child: Center(child:body),
-                    color: Colors.black54,
-                  );
-                },
-              ),
-              controller: _refreshController,
-              onRefresh: _onRefresh,
-              onLoading: _onLoading,
-              child: widget.itemBuilderType == PaginateBuilderType.listView
-                  ? _buildListView(loadedState)
-                  : _buildGridView(loadedState)
-
-              )
-          );
+                  enablePullDown: true,
+                  enablePullUp: true,
+                  header: WaterDropHeader(),
+                  footer: CustomFooter(
+                    loadStyle: LoadStyle.ShowWhenLoading,
+                    builder: (BuildContext context, LoadStatus mode) {
+                      Widget body;
+                      if (mode == LoadStatus.loading) {
+                        body = CupertinoActivityIndicator();
+                      }
+                      return Container(
+                        height: widget.footerHeight,
+                        child: Center(child: body),
+                        color: widget.footerColor,
+                      );
+                    },
+                  ),
+                  controller: _refreshController,
+                  onRefresh: _onRefresh,
+                  onLoading: _onLoading,
+                  child: widget.itemBuilderType == PaginateBuilderType.listView
+                      ? _buildListView(loadedState)
+                      : _buildGridView(loadedState)));
         }
       },
     );

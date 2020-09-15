@@ -12,13 +12,13 @@ part 'pagination_state.dart';
 
 class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationState> {
   PaginationBloc(
-      this._query,
-      this._limit,
-      this._lastVal,
-      this._attribute,
-      this.modelBuilder,
-      this.comparatorItem,
-      ) : super(PaginationInitial());
+    this._query,
+    this._limit,
+    this._lastVal,
+    this._attribute,
+    this.modelBuilder,
+    this.comparatorItem,
+  ) : super(PaginationInitial());
 
   int _lastVal;
   String _attribute;
@@ -30,9 +30,8 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationState> {
 
   @override
   Stream<PaginationState> mapEventToState(
-      PaginationEvent event,
-      ) async* {
-
+    PaginationEvent event,
+  ) async* {
     if (event is PageRefreshed) {
       _lastDocument = null;
       final newItems = await _getData();
@@ -42,8 +41,8 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationState> {
       return;
     }
 
-  if (event is PageFetch) {
-    final currentState = state;
+    if (event is PageFetch) {
+      final currentState = state;
       try {
         if (currentState is PaginationInitial) {
           final newItems = await _getData();
@@ -65,13 +64,13 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationState> {
     }
   }
 
-
-  Future<void> _getOrdered(Set<T> set, Query query, int callLimit) async{
+  Future<void> _getOrdered(Set<T> set, Query query, int callLimit) async {
     query = query.limitToLast(callLimit);
     var list;
 
     try {
-      list = FirebaseList(query: query,
+      list = FirebaseList(
+          query: query,
           onChildAdded: (pos, snapshot) {},
           onChildRemoved: (pos, snapshot) {},
           onChildChanged: (pos, snapshot) {},
@@ -82,12 +81,11 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationState> {
             }
             _lastVal = list[0].value[_attribute];
             _lastDocument = list[0].key;
-          }
-      );
+          });
 
       // wait until the data has been received
       await query.once().then((snapshot) {});
-    } on Exception catch(exception){
+    } on Exception catch (exception) {
       rethrow;
     }
   }
@@ -103,13 +101,13 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationState> {
       int initialLen = newData.length;
       int callLimit = _limit;
 
-      if(_lastDocument == null){
+      if (_lastDocument == null) {
         await _getOrdered(newData, localQuery, callLimit);
-      }else {
-        while(callLimit != 0){
+      } else {
+        while (callLimit != 0) {
           await _getOrdered(newData, localQuery, callLimit);
           callLimit -= (newData.length - initialLen);
-          if(newData.length == initialLen){
+          if (newData.length == initialLen) {
             break;
           }
           initialLen = newData.length;

@@ -1,11 +1,9 @@
 part of 'pagination_bloc.dart';
 
 @immutable
-abstract class PaginationState extends Equatable{
-}
+abstract class PaginationState extends Equatable {}
 
 class PaginationInitial extends PaginationState {
-
   @override
   List<Object> get props => [];
 }
