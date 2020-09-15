@@ -18,11 +18,9 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationState> {
       this._attribute,
       this.modelBuilder,
       this.comparatorItem,
-      this.timeOut,
       ) : super(PaginationInitial());
 
   int _lastVal;
-  int timeOut;
   String _attribute;
   String _lastDocument;
   final Query _query;
@@ -71,21 +69,27 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationState> {
   Future<void> _getOrdered(Set<T> set, Query query, int callLimit) async{
     query = query.limitToLast(callLimit);
     var list;
-    list = FirebaseList(query: query,
-        onChildAdded: (pos, snapshot) {},
-        onChildRemoved: (pos, snapshot) {},
-        onChildChanged: (pos, snapshot) {},
-        onChildMoved: (oldpos, newpos, snapshot) {},
-        onValue: (snapshot) {
-          for (var i=0; i < list.length; i++) {
-            set.add(modelBuilder(list[i].value, list[i].key));
-          }
-          _lastVal = list[0].value[_attribute];
-          _lastDocument = list[0].key;
-        }
-    );
 
-    await Future.delayed(Duration(milliseconds: timeOut));
+    try {
+      list = FirebaseList(query: query,
+          onChildAdded: (pos, snapshot) {},
+          onChildRemoved: (pos, snapshot) {},
+          onChildChanged: (pos, snapshot) {},
+          onChildMoved: (oldpos, newpos, snapshot) {},
+          onValue: (snapshot) {
+            for (var i = 0; i < list.length; i++) {
+              set.add(modelBuilder(list[i].value, list[i].key));
+            }
+            _lastVal = list[0].value[_attribute];
+            _lastDocument = list[0].key;
+          }
+      );
+
+      // wait until the data has been received
+      await query.once().then((snapshot) {});
+    } on Exception catch(exception){
+      rethrow;
+    }
   }
 
   Future<List<T>> _getData({List<T> currentData}) async {
@@ -115,7 +119,7 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationState> {
       var result = newData.toList();
       result.sort(comparatorItem);
       return result;
-    } on PlatformException catch (exception) {
+    } on Exception catch (exception) {
       print(exception);
       rethrow;
     }

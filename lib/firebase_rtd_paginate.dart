@@ -62,7 +62,6 @@ class FirebaseRTDPaginate<T> extends StatefulWidget {
         this.scrollDirection = Axis.vertical,
         this.padding = const EdgeInsets.all(0),
         this.itemBuilderType,
-        this.timeOut = 1000,
         this.physics})
       : super(key: key);
 
@@ -84,7 +83,6 @@ class FirebaseRTDPaginate<T> extends StatefulWidget {
   final bool shrinkWrap;
   final String attribute;
   final int lastVal;
-  final int timeOut;
 
   @override
   _FirebaseRTDPaginateState createState() => _FirebaseRTDPaginateState<T>();
@@ -161,12 +159,6 @@ class _FirebaseRTDPaginateState<T> extends State<FirebaseRTDPaginate<T>> {
 
               )
           );
-
-//
-//
-//            widget.itemBuilderType == PaginateBuilderType.listView
-//              ? _buildListView(loadedState)
-//              : _buildGridView(loadedState);
         }
       },
     );
@@ -182,7 +174,6 @@ class _FirebaseRTDPaginateState<T> extends State<FirebaseRTDPaginate<T>> {
       widget.attribute,
       widget.modelBuilder,
       widget.comparatorItem,
-      widget.timeOut,
     )..add(PageFetch());
   }
 
